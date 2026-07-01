@@ -75,35 +75,44 @@ function createMatch(playerDeck, oppDeck, rngSeed) {
       roundWinner: null,
     };
 
-    // 확률 미리 계산 (UI에서 표시용)
+    // 확률 미리 계산 — 겹침 100% 기준 (UI 표시용 참고값)
     const r = state.currentRound;
     const atk = r.attacker === 'player' ? playerCard : oppCard;
     const def = r.attacker === 'player' ? oppCard    : playerCard;
-    r.flipChance = calcFlipChance(atk, def);
+    r.flipChance = calcFlipChance(atk, def, 1.0);
 
     state.phase = 'throw';
     return { playerCard, oppCard, flipChance: r.flipChance };
   }
 
   // ─── 던지기 판정 ──────────────────────────────────
-  // 반환: { success, roll, flipChance, roundWinner }
-  function resolveThrow() {
+  // overlapRatio: 0.0~1.0 (UI에서 X/Y 바 위치로 계산해서 전달)
+  // 반환: { success, roll, flipChance, roundWinner?, attacker }
+  // 성공 → phase='round-end', roundWinner 설정
+  // 실패 → 공수교대, phase='throw' 유지 (누군가 성공할 때까지 반복)
+  function resolveThrow(overlapRatio, bonusPct = 0) {
     if (state.phase !== 'throw') throw new Error('던지기 단계가 아닙니다.');
     const r = state.currentRound;
 
+    const atk = r.attacker === 'player' ? r.playerCard : r.oppCard;
+    const def = r.attacker === 'player' ? r.oppCard    : r.playerCard;
+    const base = calcFlipChance(atk, def, overlapRatio ?? 1);
+    r.flipChance = Math.max(0, Math.min(100, base > 0 ? base + bonusPct : 0));
+
     const roll = rng.next() * 100;
     const success = roll < r.flipChance;
-
-    // ROUND_MODE === 'single-attack':
-    //   성공 → 공격자 승 / 실패 → 수비자 승
     r.roll = Math.round(roll * 10) / 10;
-    r.success = success;
-    r.roundWinner = success
-      ? r.attacker
-      : (r.attacker === 'player' ? 'opp' : 'player');
 
-    state.phase = 'round-end';
-    return { success, roll: r.roll, flipChance: r.flipChance, roundWinner: r.roundWinner };
+    if (success) {
+      r.success = true;
+      r.roundWinner = r.attacker;
+      state.phase = 'round-end';
+      return { success: true, roll: r.roll, flipChance: r.flipChance, roundWinner: r.roundWinner, attacker: r.attacker };
+    } else {
+      // 공수교대 — 실패한 쪽이 수비로
+      r.attacker = r.attacker === 'player' ? 'opp' : 'player';
+      return { success: false, roll: r.roll, flipChance: r.flipChance, attacker: r.attacker };
+    }
   }
 
   // ─── 라운드 종료 처리 ─────────────────────────────
@@ -136,8 +145,8 @@ function createMatch(playerDeck, oppDeck, rngSeed) {
       return { scores: { ...state.scores }, matchDone: true, matchWinner: state.winner };
     }
 
-    // 다음 라운드 — 선공 교대
-    state.firstAttacker = state.firstAttacker === 'player' ? 'opp' : 'player';
+    // 다음 라운드 — 패자가 선공
+    state.firstAttacker = r.roundWinner === 'player' ? 'opp' : 'player';
     state.phase = 'card-select';
     return { scores: { ...state.scores }, matchDone: false, nextPhase: 'card-select' };
   }

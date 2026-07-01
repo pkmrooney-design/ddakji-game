@@ -14,6 +14,97 @@ body {
 }
 h1 { font-size: 2rem; margin-bottom: 8px; color: #f5c842; }
 
+/* ── 타이틀 화면 ── */
+#title-screen {
+  display: flex; position: fixed; inset: 0;
+  background: #0d0d1a;
+  flex-direction: column; align-items: center; justify-content: center;
+  gap: 0; z-index: 200;
+  overflow: hidden;
+}
+#title-bg-circles {
+  position: absolute; inset: 0; pointer-events: none;
+}
+#title-bg-circles span {
+  position: absolute; border-radius: 50%;
+  opacity: 0.07; animation: float 8s ease-in-out infinite;
+}
+@keyframes float {
+  0%,100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(-30px) scale(1.06); }
+}
+#title-logo {
+  position: relative; text-align: center; margin-bottom: 40px;
+}
+#title-logo .main-title {
+  font-size: clamp(3rem, 10vw, 5.5rem);
+  font-weight: 900; letter-spacing: -2px;
+  background: linear-gradient(135deg, #f5c842 0%, #ff6b35 50%, #e74c3c 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 30px rgba(245,200,66,0.4));
+  line-height: 1;
+}
+#title-logo .sub-title {
+  font-size: 1rem; color: #888; letter-spacing: 4px;
+  text-transform: uppercase; margin-top: 10px;
+}
+#title-cards-preview {
+  display: flex; gap: 16px; margin-bottom: 50px;
+  position: relative;
+}
+.preview-card {
+  width: 64px; height: 88px; border-radius: 10px;
+  border: 2px solid rgba(255,255,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem;
+  animation: cardFloat 3s ease-in-out infinite;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+.preview-card:nth-child(1) { background: linear-gradient(135deg,#6c1a1a,#8e44ad); animation-delay: 0s; }
+.preview-card:nth-child(2) { background: linear-gradient(135deg,#1a3a6c,#2980b9); animation-delay:.4s; transform: translateY(-10px); }
+.preview-card:nth-child(3) { background: linear-gradient(135deg,#1a4a2e,#27ae60); animation-delay:.8s; }
+.preview-card:nth-child(4) { background: linear-gradient(135deg,#3a3a3a,#555);    animation-delay:1.2s; transform: translateY(-10px); }
+@keyframes cardFloat {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-12px); }
+}
+.preview-card:nth-child(2) { animation: cardFloat2 3s ease-in-out infinite .4s; }
+.preview-card:nth-child(4) { animation: cardFloat2 3s ease-in-out infinite 1.2s; }
+@keyframes cardFloat2 {
+  0%,100% { transform: translateY(-10px); }
+  50%      { transform: translateY(2px); }
+}
+#title-btns {
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+}
+.title-btn {
+  width: 240px; padding: 16px 0; border-radius: 50px;
+  border: none; font-size: 1.1rem; font-weight: 700;
+  cursor: pointer; transition: all .2s; letter-spacing: 1px;
+}
+.title-btn.primary {
+  background: linear-gradient(135deg, #f5c842, #ff6b35);
+  color: #1a1a2e;
+  box-shadow: 0 6px 24px rgba(245,200,66,0.35);
+}
+.title-btn.primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 32px rgba(245,200,66,0.5);
+}
+.title-btn.secondary {
+  background: rgba(255,255,255,0.06);
+  color: #ccc; border: 1px solid rgba(255,255,255,0.15);
+}
+.title-btn.secondary:hover {
+  background: rgba(255,255,255,0.12); color: #fff;
+  transform: translateY(-2px);
+}
+#title-version {
+  position: absolute; bottom: 20px;
+  font-size: .75rem; color: #444; letter-spacing: 2px;
+}
+
 /* 라운드 스코어 */
 #score-board { font-size: 1rem; margin-bottom: 12px; color: #aaa; }
 #round-pips { display: flex; gap: 8px; justify-content: center; margin-bottom: 12px; }
@@ -148,6 +239,59 @@ canvas { display: block; }
 .type-beta    { background: #e67e22; color: #fff; }
 .type-gamma   { background: #27ae60; color: #fff; }
 .type-none    { background: #555;    color: #ddd; }
+
+/* 드래프트 화면 */
+#draft-screen {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.95); z-index: 100;
+  flex-direction: column; align-items: center;
+  justify-content: flex-start; padding: 24px 16px;
+  gap: 12px; overflow-y: auto;
+}
+#draft-screen h2 { color: #f5c842; font-size: 1.2rem; margin: 0; }
+#draft-phase-label { color: #aaa; font-size: .85rem; }
+.draft-section { width: 100%; max-width: 700px; }
+.draft-section-title {
+  font-size: .8rem; font-weight: bold; margin-bottom: 6px;
+  padding: 3px 8px; border-radius: 4px; display: inline-block;
+}
+.draft-section-title.player { background: rgba(52,152,219,.3); color: #3498db; }
+.draft-section-title.opp    { background: rgba(231,76,60,.3);  color: #e74c3c; }
+.draft-cards {
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+.draft-card {
+  background: #16213e; border: 2px solid #2a2a4a;
+  border-radius: 10px; padding: 8px 10px; text-align: center;
+  min-width: 90px; font-size: 11px; transition: all 0.15s;
+  position: relative;
+}
+.draft-card.clickable { cursor: pointer; }
+.draft-card.clickable:hover { border-color: #f5c842; transform: translateY(-2px); }
+.draft-card.banned {
+  opacity: 0.25; border-color: #e74c3c;
+  text-decoration: line-through;
+}
+.draft-card.picked { border-color: #2ecc71; background: rgba(46,204,113,.1); }
+.draft-card .badge { display:inline-block; padding:1px 6px; border-radius:3px; font-size:10px; font-weight:bold; margin-bottom:3px; }
+.draft-card .cname { font-weight: bold; font-size: 12px; margin-bottom: 2px; }
+.draft-card .cstats { color: #888; font-size: 10px; }
+.draft-card .status-tag {
+  position: absolute; top: -8px; right: -8px;
+  font-size: 10px; font-weight: bold; padding: 1px 5px; border-radius: 8px;
+}
+.draft-card .status-tag.ban  { background: #e74c3c; color: #fff; }
+.draft-card .status-tag.pick { background: #2ecc71; color: #fff; }
+#draft-picked-row {
+  display: flex; gap: 32px; width: 100%; max-width: 700px;
+  justify-content: center;
+}
+.draft-picked-col { display: flex; flex-direction: column; gap: 6px; align-items: center; }
+.draft-picked-col .col-label { font-size: .75rem; color: #aaa; }
+.draft-picked-col .picked-cards { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+#draft-action-hint {
+  color: #f5c842; font-size: .95rem; font-weight: bold; text-align: center;
+}
 </style>
 </head>
 <body>
@@ -177,12 +321,70 @@ canvas { display: block; }
 <div id="instruction"></div>
 <button id="restart-btn" onclick="restartGame()">다시 시작</button>
 
-<!-- 덱 선택 -->
+<!-- 타이틀 화면 -->
+<div id="title-screen">
+  <div id="title-bg-circles"></div>
+  <div id="title-logo">
+    <div class="main-title">딱지치기</div>
+    <div class="sub-title">Card Flip Battle</div>
+  </div>
+  <div id="title-cards-preview">
+    <div class="preview-card">🔥</div>
+    <div class="preview-card">💧</div>
+    <div class="preview-card">🌿</div>
+    <div class="preview-card">⚫</div>
+  </div>
+  <div id="title-btns">
+    <button class="title-btn primary" onclick="startGame()">게임 시작</button>
+    <button class="title-btn secondary" onclick="showHowToPlay()">게임 방법</button>
+  </div>
+  <div id="title-version">v0.1 · BETA</div>
+</div>
+
+<!-- 게임 방법 화면 -->
+<div id="howto-screen" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.96); z-index:210; flex-direction:column; align-items:center; justify-content:center; gap:18px; padding:32px; overflow-y:auto;">
+  <h2 style="color:#f5c842; font-size:1.4rem;">게임 방법</h2>
+  <div style="max-width:480px; line-height:1.9; color:#ccc; font-size:.95rem;">
+    <p><b style="color:#f5c842">① 카드 선택</b><br>12장 중 6장을 골라 내 카드풀을 구성합니다.</p>
+    <p style="margin-top:12px"><b style="color:#f5c842">② 드래프트</b><br>가위바위보로 선후공을 정한 뒤 밴픽으로 최종 3장 덱을 완성합니다.</p>
+    <p style="margin-top:12px"><b style="color:#f5c842">③ 대전</b><br>라운드마다 카드를 1장 내고, 가로·세로 타이밍을 맞춰 상대 딱지를 뒤집으세요.<br>실패하면 공수교대! 먼저 2라운드를 따내면 승리합니다.<br>2라운드부터는 <b style="color:#e74c3c">이전 라운드 패자</b>가 선공입니다.</p>
+    <p style="margin-top:12px"><b style="color:#f5c842">④ 상성</b><br>🔥불 &gt; 🌿풀 &gt; 💧물 &gt; 🔥불 순으로 유리합니다.<br>⚫무 타입은 상성이 없는 대신 스탯 총합이 낮습니다.</p>
+    <p style="margin-top:12px"><b style="color:#f5c842">⑤ 턴 보너스</b><br>선공·후공이 한 번씩 던지면 1턴 종료, 뒤집지 못하면 매 턴 +6% 누적됩니다.</p>
+  </div>
+  <button class="title-btn primary" style="margin-top:8px" onclick="hideHowToPlay()">돌아가기</button>
+</div>
+
+<!-- 게임 시작 -->
 <div id="deck-select-screen">
-  <h2>덱을 구성하세요</h2>
-  <p id="deck-select-hint">카드를 3장 선택하세요 (0 / 3)</p>
+  <h2>딱지치기</h2>
+  <p id="deck-select-hint">가위바위보로 선후공을 정하고 드래프트를 시작합니다</p>
   <div id="card-grid"></div>
-  <button id="deck-confirm-btn" onclick="confirmDeck()">대전 시작</button>
+  <button id="deck-confirm-btn" onclick="confirmDeck()" class="active">대전 시작</button>
+</div>
+
+<!-- 드래프트 -->
+<div id="draft-screen">
+  <h2 id="draft-title">드래프트</h2>
+  <div id="draft-phase-label"></div>
+  <div id="draft-action-hint"></div>
+  <div class="draft-section">
+    <div class="draft-section-title opp">상대 카드풀</div>
+    <div id="draft-opp-pool" class="draft-cards"></div>
+  </div>
+  <div class="draft-section">
+    <div class="draft-section-title player">내 카드풀</div>
+    <div id="draft-player-pool" class="draft-cards"></div>
+  </div>
+  <div id="draft-picked-row">
+    <div class="draft-picked-col">
+      <div class="col-label">내 픽</div>
+      <div id="draft-player-picked" class="picked-cards"></div>
+    </div>
+    <div class="draft-picked-col">
+      <div class="col-label">상대 픽</div>
+      <div id="draft-opp-picked" class="picked-cards"></div>
+    </div>
+  </div>
 </div>
 
 <!-- 카드 선택 (라운드별) -->
@@ -210,12 +412,23 @@ let phase = 'deck-select'; // UI 페이즈
 let animId;
 
 // 현재 라운드 카드
-let myCard = null, oppCard = null, flipChance = 0;
+let myCard = null, oppCard = null, flipChance = 0, maxFlipChance = 0;
+let turnBonus = 0;   // 1턴(선공+후공) 완료마다 +6%, 라운드 시작 시 리셋
+let throwCount = 0;  // 이번 라운드 총 던지기 횟수
 
 // 바 위치
 let barX = CX, barXDir = 1;
 let barY = CY, barYDir = 1;
+let myAimX = CX, myAimY = CY;   // 플레이어가 확정한 착지 좌표
+let oppAimX = CX, oppAimY = CY; // 상대 착지 좌표
 const BAR_SPEED = 4;
+
+// ─── 겹침 비율 계산 ──────────────────────────────────
+function calcOverlapRatio(x, y) {
+  const ow = Math.max(0, Math.min(x+DW/2, CX+DW/2) - Math.max(x-DW/2, CX-DW/2));
+  const oh = Math.max(0, Math.min(y+DH/2, CY+DH/2) - Math.max(y-DH/2, CY-DH/2));
+  return (ow * oh) / (DW * DH);
+}
 
 // 슬라이드 / 뒤집기
 let mySlide  = { x: CX, y: H+60 };
@@ -267,7 +480,7 @@ function showCardDisplay(show) {
         <div class="stats">공격 <b>${myCard.atk}</b> 방어 <b>${myCard.def}</b></div>
       </div>
       <div style="align-self:center;color:#f5c842;font-weight:bold;">
-        ${flipChance}%<br><span style="font-size:10px;color:#888">뒤집기 확률</span>
+        ${maxFlipChance}%<br><span style="font-size:10px;color:#888">최대 확률</span>
       </div>
       <div class="cd-card">
         <div class="type-badge ${typeClass(oppCard.type)}">${typeLabel(oppCard.type)}</div>
@@ -306,7 +519,7 @@ function toggleCard(id, el) {
     selectedCardIds.delete(id);
     el.classList.remove('selected');
   } else {
-    if (selectedCardIds.size >= 3) return;
+    if (selectedCardIds.size >= 6) return;
     selectedCardIds.add(id);
     el.classList.add('selected');
   }
@@ -315,18 +528,239 @@ function toggleCard(id, el) {
 
 function updateDeckHint() {
   const n = selectedCardIds.size;
-  document.getElementById('deck-select-hint').textContent = `카드를 3장 선택하세요 (${n} / 3)`;
+  document.getElementById('deck-select-hint').textContent = `카드를 6장 선택하세요 (${n} / 6)`;
   const btn = document.getElementById('deck-confirm-btn');
-  btn.classList.toggle('active', n === 3);
+  btn.classList.toggle('active', n === 6);
 }
 
 function confirmDeck() {
-  playerDeck = CARD_ROSTER.filter(c => selectedCardIds.has(c.id));
-  // 상대 덱: 랜덤 3장
+  draft.playerPool = CARD_ROSTER.filter(c => selectedCardIds.has(c.id));
+  // 상대는 12장 전체에서 랜덤 6장
   const shuffled = [...CARD_ROSTER].sort(() => Math.random() - .5);
-  oppDeck = shuffled.slice(0, 3);
+  draft.oppPool = shuffled.slice(0, 6);
   document.getElementById('deck-select-screen').style.display = 'none';
   startRps();
+}
+
+// ─── 드래프트 상태 ───────────────────────────────────
+const draft = {
+  playerPool: [],   // 내 초기 6장
+  oppPool:    [],   // 상대 초기 6장
+  playerBanned: [], // 내 풀에서 금지된 카드 ids
+  oppBanned:    [], // 상대 풀에서 금지된 카드 ids
+  playerPicked: [], // 내가 픽한 카드들
+  oppPicked:    [], // 상대가 픽한 카드들
+  firstPlayer: null, // 'player' | 'opp'
+  step: null,
+};
+
+// step 순서 (선공=first, 후공=second)
+// ban1-first  : 선공이 상대 풀에서 1장 금지
+// ban1-second : 후공이 선공 풀에서 1장 금지 (AI)
+// pick2a-first : 선공이 자기 풀에서 1장 픽
+// pick2b-second: 후공이 자기 풀에서 1장 픽 (AI) → 2번 반복
+// pick2c-first : 선공이 자기 풀에서 1장 픽
+// ban3a-second : 후공이 선공 남은 3장에서 1장 금지 (AI)
+// ban3b-first  : 선공이 후공 남은 3장에서 1장 금지
+// pick4a-second: 후공이 자기 남은 2장에서 1장 픽 (AI)
+// pick4b-first : 선공이 자기 남은 2장에서 1장 픽
+const DRAFT_STEPS = [
+  'ban1-first', 'ban1-second',
+  'pick2a-first', 'pick2b-second', 'pick2b2-second', 'pick2c-first',
+  'ban3a-second', 'ban3b-first',
+  'pick4a-second', 'pick4b-first',
+];
+
+function draftPlayerAvailable() {
+  return draft.playerPool.filter(c => !draft.playerBanned.includes(c.id) && !draft.playerPicked.find(p => p.id === c.id));
+}
+function draftOppAvailable() {
+  return draft.oppPool.filter(c => !draft.oppBanned.includes(c.id) && !draft.oppPicked.find(p => p.id === c.id));
+}
+
+function startDraft() {
+  draft.firstPlayer = match.state.firstAttacker; // RPS 결과
+  draft.step = 0;
+  draft.playerBanned = []; draft.oppBanned = [];
+  draft.playerPicked = []; draft.oppPicked = [];
+  document.getElementById('draft-screen').style.display = 'flex';
+  runDraftStep();
+}
+
+function runDraftStep() {
+  const step = DRAFT_STEPS[draft.step];
+  const isFirst = draft.firstPlayer === 'player';
+
+  // AI 스텝 여부 판단
+  const aiSteps = isFirst
+    ? ['ban1-second','pick2b-second','pick2b2-second','ban3a-second','pick4a-second']
+    : ['ban1-first','pick2a-first','pick2c-first','ban3b-first','pick4b-first'];
+
+  renderDraftScreen(step);
+
+  if (aiSteps.includes(step)) {
+    setTimeout(() => { aiDraftAction(step); }, 900);
+  }
+}
+
+function aiDraftAction(step) {
+  const isFirst = draft.firstPlayer === 'player';
+  // AI는 항상 후공(second) — isFirst=true 시 second=opp, isFirst=false 시 second=player
+  if (step === 'ban1-second') {
+    // 후공이 선공 풀에서 1장 금지
+    const pool = isFirst ? draftPlayerAvailable() : draftOppAvailable();
+    const target = pool[Math.floor(Math.random() * pool.length)];
+    if (isFirst) draft.playerBanned.push(target.id);
+    else         draft.oppBanned.push(target.id);
+  } else if (step === 'pick2b-second' || step === 'pick2b2-second') {
+    // 후공이 자기 풀에서 1장 픽
+    const pool = isFirst ? draftOppAvailable() : draftPlayerAvailable();
+    const card = pool[Math.floor(Math.random() * pool.length)];
+    if (isFirst) draft.oppPicked.push(card);
+    else         draft.playerPicked.push(card);
+  } else if (step === 'ban3a-second') {
+    // 후공이 선공 남은 3장에서 1장 금지
+    const pool = isFirst ? draftPlayerAvailable() : draftOppAvailable();
+    const target = pool[Math.floor(Math.random() * pool.length)];
+    if (isFirst) draft.playerBanned.push(target.id);
+    else         draft.oppBanned.push(target.id);
+  } else if (step === 'pick4a-second') {
+    // 후공이 자기 남은 2장에서 1장 픽
+    const pool = isFirst ? draftOppAvailable() : draftPlayerAvailable();
+    const card = pool[Math.floor(Math.random() * pool.length)];
+    if (isFirst) draft.oppPicked.push(card);
+    else         draft.playerPicked.push(card);
+  }
+  advanceDraft();
+}
+
+function playerDraftAction(card, action) {
+  const step = DRAFT_STEPS[draft.step];
+  const isFirst = draft.firstPlayer === 'player';
+
+  if (action === 'ban') {
+    if (step === 'ban1-first') {
+      // 선공이 상대 풀에서 1장 금지
+      if (isFirst) draft.oppBanned.push(card.id);
+      else         draft.playerBanned.push(card.id);
+    } else if (step === 'ban3b-first') {
+      // 선공이 후공 남은 3장에서 1장 금지
+      if (isFirst) draft.oppBanned.push(card.id);
+      else         draft.playerBanned.push(card.id);
+    }
+  } else if (action === 'pick') {
+    draft.playerPicked.push(card);
+  }
+  advanceDraft();
+}
+
+function advanceDraft() {
+  draft.step++;
+  if (draft.step >= DRAFT_STEPS.length) {
+    finishDraft();
+  } else {
+    runDraftStep();
+  }
+}
+
+function finishDraft() {
+  document.getElementById('draft-screen').style.display = 'none';
+  const isFirst = draft.firstPlayer === 'player';
+  if (isFirst) {
+    playerDeck = draft.playerPicked;
+    oppDeck    = draft.oppPicked;
+  } else {
+    // player가 후공이면 playerPicked/oppPicked 역할 그대로
+    playerDeck = draft.playerPicked;
+    oppDeck    = draft.oppPicked;
+  }
+  // match 재생성 (RPS 결과 유지 — 이미 firstAttacker 설정됨)
+  match = createMatch(playerDeck, oppDeck);
+  // firstAttacker 복원
+  match.state.firstAttacker = draft.firstPlayer;
+  match.state.phase = 'card-select';
+  openCardSelect();
+}
+
+function renderDraftScreen(step) {
+  const isFirst = draft.firstPlayer === 'player';
+  const STEP_LABELS = {
+    'ban1-first':    isFirst ? '선공(나): 상대 카드 1장 금지' : '선공(상대): 내 카드 1장 금지 중...',
+    'ban1-second':   isFirst ? '후공(상대): 내 카드 1장 금지 중...' : '후공(나): 상대 카드 1장 금지',
+    'pick2a-first':  isFirst ? '선공(나): 내 카드 1장 픽' : '선공(상대): 자기 카드 1장 픽 중...',
+    'pick2b-second': isFirst ? '후공(상대): 자기 카드 1장 픽 중...' : '후공(나): 내 카드 1장 픽',
+    'pick2b2-second':isFirst ? '후공(상대): 자기 카드 1장 픽 중...' : '후공(나): 내 카드 1장 픽',
+    'pick2c-first':  isFirst ? '선공(나): 내 카드 1장 픽' : '선공(상대): 자기 카드 1장 픽 중...',
+    'ban3a-second':  isFirst ? '후공(상대): 내 카드 1장 금지 중...' : '후공(나): 상대 카드 1장 금지',
+    'ban3b-first':   isFirst ? '선공(나): 상대 카드 1장 금지' : '선공(상대): 내 카드 1장 금지 중...',
+    'pick4a-second': isFirst ? '후공(상대): 자기 카드 1장 픽 중...' : '후공(나): 내 카드 1장 픽',
+    'pick4b-first':  isFirst ? '선공(나): 내 카드 1장 픽' : '선공(상대): 자기 카드 1장 픽 중...',
+  };
+
+  // 이번 스텝에서 플레이어가 할 행동
+  const playerBanOpp  = (isFirst && (step==='ban1-first'||step==='ban3b-first')) || (!isFirst && (step==='ban1-second'||step==='ban3a-second'));
+  const playerPickSelf = (isFirst && (step==='pick2a-first'||step==='pick2c-first'||step==='pick4b-first')) || (!isFirst && (step==='pick2b-second'||step==='pick2b2-second'||step==='pick4a-second'));
+
+  document.getElementById('draft-phase-label').textContent =
+    `Phase ${Math.floor(draft.step/2)+1} / 5`;
+  document.getElementById('draft-action-hint').textContent = STEP_LABELS[step] || '';
+
+  renderDraftPool('draft-opp-pool', draft.oppPool, draft.oppBanned, draft.oppPicked,
+    playerBanOpp ? 'ban' : null, isFirst ? null : (playerPickSelf ? 'pick' : null));
+
+  renderDraftPool('draft-player-pool', draft.playerPool, draft.playerBanned, draft.playerPicked,
+    (!isFirst && (step==='ban1-first'||step==='ban3b-first')) ? 'ban' : null,
+    (isFirst && playerPickSelf) ? 'pick' : null);
+
+  // 픽한 카드 표시
+  renderPickedCards('draft-player-picked', draft.playerPicked);
+  renderPickedCards('draft-opp-picked', draft.oppPicked);
+}
+
+function renderDraftPool(containerId, pool, banned, picked, banAction, pickAction) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  pool.forEach(card => {
+    const isBanned = banned.includes(card.id);
+    const isPicked = picked.find(p => p.id === card.id);
+    const isAvail  = !isBanned && !isPicked;
+
+    const div = document.createElement('div');
+    div.className = 'draft-card' + (isBanned ? ' banned' : isPicked ? ' picked' : '');
+
+    const canAct = isAvail && (banAction || pickAction);
+    if (canAct) div.classList.add('clickable');
+
+    div.innerHTML = `
+      <div><span class="badge ${typeClass(card.type)}">${typeLabel(card.type)}</span></div>
+      <div class="cname">${card.label}</div>
+      <div class="cstats">공${card.atk} / 방${card.def}</div>
+      ${isBanned ? '<span class="status-tag ban">금지</span>' : ''}
+      ${isPicked ? '<span class="status-tag pick">픽</span>' : ''}`;
+
+    if (canAct) {
+      div.addEventListener('click', () => {
+        if (banAction) playerDraftAction(card, 'ban');
+        else           playerDraftAction(card, 'pick');
+      });
+    }
+    el.appendChild(div);
+  });
+}
+
+function renderPickedCards(containerId, picked) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  picked.forEach(card => {
+    const div = document.createElement('div');
+    div.className = 'draft-card picked';
+    div.style.minWidth = '70px';
+    div.innerHTML = `
+      <div><span class="badge ${typeClass(card.type)}">${typeLabel(card.type)}</span></div>
+      <div class="cname">${card.label}</div>
+      <div class="cstats">공${card.atk} / 방${card.def}</div>`;
+    el.appendChild(div);
+  });
 }
 
 // ─── 가위바위보 ─────────────────────────────────────
@@ -382,11 +816,11 @@ function handleRpsResult(result) {
       drawRpsScene();
     }, 1400);
   } else if (result.winner === 'player') {
-    setMsg('이겼다! 내가 먼저 시작!');
-    setTimeout(openCardSelect, 1600);
+    setMsg('이겼다! 내가 선공! 드래프트 시작!');
+    setTimeout(startDraft, 1600);
   } else {
-    setMsg('졌다... 상대가 먼저 시작!');
-    setTimeout(openCardSelect, 1600);
+    setMsg('졌다... 상대가 선공! 드래프트 시작!');
+    setTimeout(startDraft, 1600);
   }
 }
 
@@ -441,6 +875,9 @@ function selectMyCard(card) {
   myCard = card;
   oppCard = oppCard_;
   flipChance = result.flipChance;
+  maxFlipChance = result.flipChance; // 겹침 100% 기준 최대값
+  turnBonus = 0;  // 새 라운드 리셋
+  throwCount = 0;
   updatePips();
 
   // 선공에 따라 배틀 시작
@@ -453,36 +890,44 @@ function selectMyCard(card) {
 
 // ─── 배틀: 내 턴 ────────────────────────────────────
 function startMyTurn() {
+  // 내가 공격자일 때 최대 확률 (겹침 100% 기준) 재계산
+  if (myCard && oppCard) maxFlipChance = Math.min(100, calcFlipChance(myCard, oppCard, 1.0) + turnBonus);
   phase = 'my-x';
   barX = CX; barXDir = 1;
   oppFlipProg = 0; oppFlipped = false; myFlipProg = 0;
   resultText = '';
   showCardDisplay(true);
-  setMsg('클릭해서 X축 위치를 정하세요!');
-  setHint(`뒤집기 확률: ${flipChance}%`);
+  setMsg('클릭해서 가로 위치를 정하세요!');
+  setHint(`최대 확률: ${maxFlipChance}%`);
   gameLoop();
 }
 
 canvas.addEventListener('click', () => {
   if (phase === 'my-x') {
     cancelAnimationFrame(animId);
+    myAimX = barX;
     phase = 'my-y';
     barY = CY; barYDir = 1;
-    setMsg('클릭해서 Y축 위치를 정하세요!');
+    setMsg('클릭해서 세로 위치를 정하세요!');
     gameLoop();
   } else if (phase === 'my-y') {
     cancelAnimationFrame(animId);
+    myAimY = barY;
     doMyThrow();
   }
 });
 
 function doMyThrow() {
-  const throwResult = match.resolveThrow();
+  const overlap = calcOverlapRatio(myAimX, myAimY);
+  const throwResult = match.resolveThrow(overlap, turnBonus);
+  throwCount++;
+  if (throwCount % 2 === 0) turnBonus += 6;
+  flipChance = throwResult.flipChance;
   phase = 'my-slide';
   setMsg('딱지를 던졌다!');
   showCardDisplay(false);
 
-  animSlide(mySlide, CX, H+60, CX, CY, draw, () => {
+  animSlide(mySlide, CX, H+60, myAimX, myAimY, draw, () => {
     if (throwResult.success) {
       phase = 'my-flip';
       setMsg('딱지 넘어간다! 🎉');
@@ -495,34 +940,45 @@ function doMyThrow() {
       });
     } else {
       resultText = '실패... 😢'; resultColor = '#e74c3c';
-      setMsg(`확률 ${flipChance}% → 실패`);
+      setMsg(`확률 ${flipChance}% → 실패 — 상대 턴!`);
       phase = 'my-result'; draw();
-      endCurrentRound();
+      // 공수교대: 상대 턴으로
+      setTimeout(() => {
+        resultText = '';
+        oppFlipProg = 0; myFlipProg = 0;
+        showCardDisplay(true);
+        startOppTurn();
+      }, 1400);
     }
   });
 }
 
 // ─── 배틀: 상대 턴 ──────────────────────────────────
 function startOppTurn() {
+  // 상대가 공격자일 때 최대 확률 (겹침 100% 기준) 재계산
+  if (myCard && oppCard) maxFlipChance = Math.min(100, calcFlipChance(oppCard, myCard, 1.0) + turnBonus);
   phase = 'opp-x';
   barX = CX; barXDir = 1;
   oppFlipProg = 0; myFlipProg = 0;
   resultText = '';
   showCardDisplay(true);
-  setMsg('상대방이 X축을 조준합니다...');
-  setHint(`상대 뒤집기 확률: ${flipChance}%`);
+  setMsg('상대방이 가로을 조준합니다...');
+  setHint(`최대 확률: ${maxFlipChance}%`);
   gameLoop();
+
+  oppAimX = CX + (Math.random()-.5)*200;
+  oppAimY = CY + (Math.random()-.5)*200;
 
   setTimeout(() => {
     cancelAnimationFrame(animId);
-    animBarSnap(() => barX, v => barX = v, CX + (Math.random()-.5)*200, () => {
+    animBarSnap(() => barX, v => barX = v, oppAimX, () => {
       phase = 'opp-y';
       barY = CY; barYDir = 1;
-      setMsg('상대방이 Y축을 조준합니다...');
+      setMsg('상대방이 세로을 조준합니다...');
       gameLoop();
       setTimeout(() => {
         cancelAnimationFrame(animId);
-        animBarSnap(() => barY, v => barY = v, CY + (Math.random()-.5)*200, () => {
+        animBarSnap(() => barY, v => barY = v, oppAimY, () => {
           doOppThrow();
         });
       }, 900);
@@ -531,12 +987,16 @@ function startOppTurn() {
 }
 
 function doOppThrow() {
-  const throwResult = match.resolveThrow();
+  const overlap = calcOverlapRatio(oppAimX, oppAimY);
+  const throwResult = match.resolveThrow(overlap, turnBonus);
+  throwCount++;
+  if (throwCount % 2 === 0) turnBonus += 6;
+  flipChance = throwResult.flipChance;
   phase = 'opp-slide';
   setMsg('상대방이 딱지를 던졌다!');
   showCardDisplay(false);
 
-  animSlide(oppSlide, CX, -60, CX, CY, draw, () => {
+  animSlide(oppSlide, CX, -60, oppAimX, oppAimY, draw, () => {
     if (throwResult.success) {
       phase = 'opp-flip';
       setMsg('내 딱지가 넘어간다! 😱');
@@ -548,9 +1008,15 @@ function doOppThrow() {
       });
     } else {
       resultText = '상대 실패! 😄'; resultColor = '#2ecc71';
-      setMsg(`확률 ${flipChance}% → 상대 실패!`);
+      setMsg(`확률 ${flipChance}% → 상대 실패 — 내 턴!`);
       phase = 'opp-result'; draw();
-      endCurrentRound();
+      // 공수교대: 내 턴으로
+      setTimeout(() => {
+        resultText = '';
+        oppFlipProg = 0; myFlipProg = 0;
+        showCardDisplay(true);
+        startMyTurn();
+      }, 1400);
     }
   });
 }
@@ -630,15 +1096,35 @@ function drawMyDdakji_static() {
   drawDdakji(CX, CY+jy, sx, col, shadeColor(col,-40), '내 딱지');
 }
 
+function getLiveFlipChance() {
+  if (!myCard || !oppCard) return flipChance;
+  const atk = match.state.currentRound?.attacker === 'player' ? myCard : oppCard;
+  const def = match.state.currentRound?.attacker === 'player' ? oppCard : myCard;
+  let x, y;
+  if (phase === 'my-x')  { x = barX;    y = CY; }
+  else if (phase === 'my-y')  { x = myAimX;  y = barY; }
+  else if (phase === 'opp-x') { x = barX;    y = CY; }
+  else if (phase === 'opp-y') { x = oppAimX; y = barY; }
+  else return flipChance;
+  const ratio = calcOverlapRatio(x, y);
+  const base = calcFlipChance(atk, def, ratio);
+  return Math.max(0, Math.min(100, base > 0 ? base + turnBonus : 0));
+}
+
 function drawFlipChanceMeter() {
+  const live = getLiveFlipChance();
   const bx=W-110, by=10, bw=100, bh=14;
-  const prob = flipChance/100;
+  const prob = live/100;
   ctx.fillStyle='rgba(0,0,0,.4)'; ctx.fillRect(bx,by,bw,bh);
   ctx.fillStyle=prob>.6?'#2ecc71':prob>.35?'#f39c12':'#e74c3c';
   ctx.fillRect(bx,by,bw*prob,bh);
   ctx.strokeStyle='#fff'; ctx.lineWidth=1; ctx.strokeRect(bx,by,bw,bh);
   ctx.fillStyle='#fff'; ctx.font='10px sans-serif'; ctx.textAlign='right';
-  ctx.fillText(`뒤집기 ${flipChance}%`, W-10, by+11);
+  ctx.fillText(`뒤집기 ${live}%`, W-10, by+11);
+  if (turnBonus > 0) {
+    ctx.fillStyle='#f5c842'; ctx.font='bold 10px sans-serif';
+    ctx.fillText(`누적 +${turnBonus}%`, W-10, by+26);
+  }
 }
 
 function drawXBar(col) {
@@ -694,12 +1180,12 @@ function draw() {
 
   } else if (phase==='my-flip') {
     drawOppDdakji();
-    drawDdakji(CX, CY, 1, getMyDdakjiColor(), '#2980b9', null);
+    drawDdakji(mySlide.x, mySlide.y, 1, getMyDdakjiColor(), '#2980b9', null);
     drawFlipChanceMeter(); drawTurnLabel('▶ 내 차례','#f5c842');
 
   } else if (phase==='my-result') {
     drawOppDdakji();
-    drawDdakji(CX, CY, 1, getMyDdakjiColor(), '#2980b9', null);
+    drawDdakji(mySlide.x, mySlide.y, 1, getMyDdakjiColor(), '#2980b9', null);
     ctx.fillStyle=resultColor; ctx.font='bold 34px sans-serif'; ctx.textAlign='center';
     ctx.shadowColor=resultColor; ctx.shadowBlur=16;
     ctx.fillText(resultText, W/2, 60); ctx.shadowBlur=0;
@@ -726,12 +1212,12 @@ function draw() {
 
   } else if (phase==='opp-flip') {
     drawMyDdakji_static();
-    drawDdakji(CX, CY, 1, getOppDdakjiColor(), '#c0392b', null);
+    drawDdakji(oppSlide.x, oppSlide.y, 1, getOppDdakjiColor(), '#c0392b', null);
     drawFlipChanceMeter(); drawTurnLabel('◀ 상대 차례','#e74c3c');
 
   } else if (phase==='opp-result') {
     drawMyDdakji_static();
-    drawDdakji(CX, CY, 1, getOppDdakjiColor(), '#c0392b', null);
+    drawDdakji(oppSlide.x, oppSlide.y, 1, getOppDdakjiColor(), '#c0392b', null);
     ctx.fillStyle=resultColor; ctx.font='bold 34px sans-serif'; ctx.textAlign='center';
     ctx.shadowColor=resultColor; ctx.shadowBlur=16;
     ctx.fillText(resultText, W/2, 60); ctx.shadowBlur=0;
@@ -854,12 +1340,52 @@ function restartGame() {
   document.getElementById('restart-btn').style.display='none';
   showCardDisplay(false);
   updatePips();
+  initAndStartRps();
+}
+
+function initAndStartRps() {
   openDeckSelect();
+}
+
+// ─── 타이틀 화면 ─────────────────────────────────────
+function showTitleScreen() {
+  // 배경 원 생성
+  const bg = document.getElementById('title-bg-circles');
+  if (!bg.children.length) {
+    const colors = ['#f5c842','#e74c3c','#3498db','#2ecc71','#9b59b6'];
+    for (let i = 0; i < 8; i++) {
+      const s = document.createElement('span');
+      const size = 120 + Math.random() * 300;
+      s.style.cssText = `
+        width:${size}px; height:${size}px;
+        background:${colors[i % colors.length]};
+        left:${Math.random()*100}%; top:${Math.random()*100}%;
+        transform: translate(-50%,-50%);
+        animation-delay:${Math.random()*4}s;
+        animation-duration:${6+Math.random()*4}s;
+      `;
+      bg.appendChild(s);
+    }
+  }
+  document.getElementById('title-screen').style.display = 'flex';
+}
+
+function startGame() {
+  document.getElementById('title-screen').style.display = 'none';
+  initAndStartRps();
+}
+
+function showHowToPlay() {
+  document.getElementById('howto-screen').style.display = 'flex';
+}
+
+function hideHowToPlay() {
+  document.getElementById('howto-screen').style.display = 'none';
 }
 
 // ─── 시작 ────────────────────────────────────────────
 updatePips();
-openDeckSelect();
+showTitleScreen();
 </script>
 </body>
 </html>
