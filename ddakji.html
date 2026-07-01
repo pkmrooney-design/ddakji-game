@@ -292,6 +292,50 @@ canvas { display: block; }
 #draft-action-hint {
   color: #f5c842; font-size: .95rem; font-weight: bold; text-align: center;
 }
+
+/* ── 튜토리얼 ── */
+#tut-overlay {
+  display: none; position: fixed; inset: 0; z-index: 400;
+  pointer-events: none;
+}
+#tut-box {
+  position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
+  background: #13132a; border: 2px solid #f5c842;
+  border-radius: 18px; padding: 22px 28px 18px;
+  width: min(420px, 94vw); pointer-events: all;
+  box-shadow: 0 8px 48px rgba(0,0,0,.85);
+}
+#tut-step-label {
+  font-size: .72rem; color: #888; letter-spacing: 2px;
+  text-transform: uppercase; margin-bottom: 6px;
+}
+#tut-title {
+  font-size: 1.05rem; font-weight: 800; color: #f5c842; margin-bottom: 8px;
+}
+#tut-body {
+  font-size: .88rem; color: #ccc; line-height: 1.7;
+  white-space: pre-line; margin-bottom: 16px;
+}
+#tut-footer {
+  display: flex; justify-content: space-between; align-items: center;
+}
+#tut-skip-btn {
+  background: none; border: none; color: #555;
+  font-size: .8rem; cursor: pointer; padding: 4px 8px;
+}
+#tut-skip-btn:hover { color: #aaa; }
+#tut-next-btn {
+  background: linear-gradient(135deg,#f5c842,#ff6b35);
+  color: #1a1a2e; border: none; border-radius: 24px;
+  padding: 9px 22px; font-size: .9rem; font-weight: 700;
+  cursor: pointer; transition: all .15s;
+}
+#tut-next-btn:hover { transform: translateY(-2px); }
+.tut-highlight {
+  outline: 3px solid #f5c842 !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 6px rgba(245,200,66,.2) !important;
+}
 </style>
 </head>
 <body>
@@ -336,9 +380,23 @@ canvas { display: block; }
   </div>
   <div id="title-btns">
     <button class="title-btn primary" onclick="startGame()">게임 시작</button>
+    <button class="title-btn secondary" onclick="startTutorial()">튜토리얼</button>
     <button class="title-btn secondary" onclick="showHowToPlay()">게임 방법</button>
   </div>
   <div id="title-version">v0.1 · BETA</div>
+</div>
+
+<!-- 튜토리얼 툴팁 -->
+<div id="tut-overlay">
+  <div id="tut-box">
+    <div id="tut-step-label"></div>
+    <div id="tut-title"></div>
+    <div id="tut-body"></div>
+    <div id="tut-footer">
+      <button id="tut-skip-btn" onclick="skipTutorial()">건너뛰기</button>
+      <button id="tut-next-btn" onclick="tutNext()">다음 →</button>
+    </div>
+  </div>
 </div>
 
 <!-- 게임 방법 화면 -->
@@ -783,7 +841,13 @@ function chooseRPS(choice) {
 
   // match이 없으면 생성, 있으면 RPS만 처리
   if (!match) match = createMatch(playerDeck, oppDeck);
-  const result = match.resolveRPS(choice);
+  let result = match.resolveRPS(choice);
+  // 튜토리얼: 항상 플레이어 승리로 강제
+  if (tutMode && result.winner !== 'player') {
+    result = { ...result, winner: 'player' };
+    match.state.firstAttacker = 'player';
+    match.state.phase = 'card-select';
+  }
   rpsOppChoice = result.oppChoice;
 
   // 손 애니메이션
@@ -816,11 +880,21 @@ function handleRpsResult(result) {
       drawRpsScene();
     }, 1400);
   } else if (result.winner === 'player') {
-    setMsg('이겼다! 내가 선공! 드래프트 시작!');
-    setTimeout(startDraft, 1600);
+    setMsg('이겼다! 내가 선공!');
+    if (tutMode) {
+      tutCheckpoint('rps');
+      setTimeout(openCardSelect, 1600);
+    } else {
+      setTimeout(startDraft, 1600);
+    }
   } else {
-    setMsg('졌다... 상대가 선공! 드래프트 시작!');
-    setTimeout(startDraft, 1600);
+    setMsg('졌다... 상대가 선공!');
+    if (tutMode) {
+      tutCheckpoint('rps');
+      setTimeout(openCardSelect, 1600);
+    } else {
+      setTimeout(startDraft, 1600);
+    }
   }
 }
 
@@ -880,6 +954,8 @@ function selectMyCard(card) {
   throwCount = 0;
   updatePips();
 
+  tutCheckpoint('card-select');
+
   // 선공에 따라 배틀 시작
   if (match.state.currentRound.attacker === 'player') {
     startMyTurn();
@@ -909,10 +985,12 @@ canvas.addEventListener('click', () => {
     phase = 'my-y';
     barY = CY; barYDir = 1;
     setMsg('클릭해서 세로 위치를 정하세요!');
+    tutCheckpoint('throw-x');
     gameLoop();
   } else if (phase === 'my-y') {
     cancelAnimationFrame(animId);
     myAimY = barY;
+    tutCheckpoint('throw-y');
     doMyThrow();
   }
 });
@@ -936,12 +1014,14 @@ function doMyThrow() {
         resultText = '딱지 넘어감! 🎉'; resultColor = '#2ecc71';
         setMsg(`확률 ${flipChance}% → 성공!`);
         phase = 'my-result'; draw();
+        tutCheckpoint('result');
         endCurrentRound();
       });
     } else {
       resultText = '실패... 😢'; resultColor = '#e74c3c';
       setMsg(`확률 ${flipChance}% → 실패 — 상대 턴!`);
       phase = 'my-result'; draw();
+      tutCheckpoint('result');
       // 공수교대: 상대 턴으로
       setTimeout(() => {
         resultText = '';
@@ -1345,6 +1425,112 @@ function restartGame() {
 
 function initAndStartRps() {
   openDeckSelect();
+}
+
+// ── 튜토리얼 ────────────────────────────────────────
+let tutMode = false;
+let tutStep = 0;
+let tutNextAction = null; // 'next' | 'rps' | 'card-select' | 'throw-x' | 'throw-y' | 'result'
+
+const TUT_STEPS = [
+  { title: '딱지치기에 오신 걸 환영합니다! 👋',
+    body: '딱지치기는 상대방의 딱지를 뒤집는 카드 게임이에요.\n함께 기본 규칙을 배워봐요!',
+    btn: '시작하기' },
+  { title: '딱지 타입 🔥💧🌿⚫',
+    body: '딱지에는 네 가지 타입이 있어요.\n🔥불 > 🌿풀 > 💧물 > 🔥불 순으로 서로 유리해요.\n⚫무 타입은 상성이 없어요.',
+    btn: '다음' },
+  { title: '공격력 & 방어력',
+    body: '각 딱지에는 공격력(공)과 방어력(방)이 있어요.\n공격력이 높을수록 뒤집기 확률이 오르고,\n상대 방어력이 높을수록 뒤집기가 어려워요.\n두 능력치의 합은 항상 일정해요!',
+    btn: '가위바위보 해보기', onNext: tutDoRps },
+  { title: '가위바위보 ✊✌️🖐️',
+    body: '가위바위보로 누가 먼저 딱지를 칠지 정해요.\n이긴 사람이 먼저 공격합니다!',
+    btn: null, waitFor: 'rps' },
+  { title: '카드를 선택하세요',
+    body: '이번 라운드에 낼 카드를 1장 골라요.\n상대 덱을 보고 유리한 타입을 골라보세요!\n(🔥불 카드는 🌿풀에 유리해요)',
+    btn: null, waitFor: 'card-select' },
+  { title: '가로 위치를 정하세요! →',
+    body: '막대기가 움직이는 동안 클릭하세요!\n가운데에 가까울수록 딱지가 많이 겹쳐서\n뒤집기 확률이 높아져요.',
+    btn: null, waitFor: 'throw-x' },
+  { title: '세로 위치를 정하세요! ↓',
+    body: '이번엔 세로 방향이에요.\n가로·세로 둘 다 가운데에 맞출수록\n뒤집기 확률이 최대가 돼요!',
+    btn: null, waitFor: 'throw-y' },
+  { title: '결과 확인!',
+    body: '성공하면 라운드를 따내고,\n실패하면 공수가 바뀌어 상대가 던져요.\n2라운드를 먼저 따내면 승리합니다!',
+    btn: '튜토리얼 완료! 🎉', onNext: endTutorial },
+];
+
+function startTutorial() {
+  document.getElementById('title-screen').style.display = 'none';
+  tutMode = true;
+  tutStep = 0;
+  renderTutBox();
+}
+
+function renderTutBox() {
+  const s = TUT_STEPS[tutStep];
+  document.getElementById('tut-overlay').style.display = 'block';
+  document.getElementById('tut-step-label').textContent = `튜토리얼 ${tutStep + 1} / ${TUT_STEPS.length}`;
+  document.getElementById('tut-title').textContent = s.title;
+  document.getElementById('tut-body').textContent = s.body;
+  const btn = document.getElementById('tut-next-btn');
+  if (s.btn) {
+    btn.style.display = 'inline-block';
+    btn.textContent = s.btn;
+  } else {
+    btn.style.display = 'none';
+  }
+  tutNextAction = s.waitFor || 'next';
+}
+
+function tutNext() {
+  const s = TUT_STEPS[tutStep];
+  if (s.onNext) { s.onNext(); return; }
+  tutStep++;
+  if (tutStep >= TUT_STEPS.length) { endTutorial(); return; }
+  renderTutBox();
+}
+
+function tutCheckpoint(name) {
+  if (!tutMode) return;
+  const s = TUT_STEPS[tutStep];
+  if (s.waitFor === name) {
+    tutStep++;
+    if (tutStep >= TUT_STEPS.length) return;
+    renderTutBox();
+  }
+}
+
+function tutDoRps() {
+  // 튜토리얼용 고정 덱: 플레이어=불(유리), 상대=풀(불리)
+  playerDeck = [
+    CARD_ROSTER.find(c => c.id === 'alpha_cannon'),
+    CARD_ROSTER.find(c => c.id === 'alpha_balance'),
+    CARD_ROSTER.find(c => c.id === 'alpha_tank'),
+  ];
+  oppDeck = [
+    CARD_ROSTER.find(c => c.id === 'gamma_cannon'),
+    CARD_ROSTER.find(c => c.id === 'gamma_balance'),
+    CARD_ROSTER.find(c => c.id === 'gamma_tank'),
+  ];
+  usedPlayerCardIds.clear();
+  usedOppCardIds.clear();
+  match = createMatch(playerDeck, oppDeck);
+  tutStep++;
+  renderTutBox();
+  startRps();
+}
+
+function skipTutorial() {
+  endTutorial();
+}
+
+function endTutorial() {
+  tutMode = false;
+  document.getElementById('tut-overlay').style.display = 'none';
+  // 하이라이트 제거
+  document.querySelectorAll('.tut-highlight').forEach(el => el.classList.remove('tut-highlight'));
+  restartGame();
+  showTitleScreen();
 }
 
 // ─── 타이틀 화면 ─────────────────────────────────────
