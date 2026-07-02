@@ -336,6 +336,112 @@ canvas { display: block; }
   outline-offset: 3px !important;
   box-shadow: 0 0 0 6px rgba(245,200,66,.2) !important;
 }
+
+/* ── 컬렉션 화면 ── */
+#collection-screen {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.96); z-index: 150;
+  flex-direction: column; align-items: center;
+  padding: 24px 16px; gap: 16px; overflow-y: auto;
+}
+#collection-screen h2 { color: #f5c842; font-size: 1.3rem; }
+#collection-gold-bar {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(245,200,66,.1); border: 1px solid rgba(245,200,66,.3);
+  border-radius: 24px; padding: 8px 20px;
+  font-size: 1rem; font-weight: 700; color: #f5c842;
+}
+#collection-progress {
+  font-size: .85rem; color: #888;
+}
+#progress-bar-wrap {
+  width: 280px; height: 8px; background: #2a2a4a;
+  border-radius: 8px; overflow: hidden;
+}
+#progress-bar-fill {
+  height: 100%; background: linear-gradient(90deg, #f5c842, #2ecc71);
+  transition: width .4s;
+}
+#collection-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 12px; max-width: 660px; width: 100%;
+}
+.col-card {
+  background: #16213e; border: 2px solid #2a2a4a;
+  border-radius: 10px; padding: 10px 8px;
+  text-align: center; position: relative;
+}
+.col-card .lv-badge {
+  position: absolute; top: -8px; right: -8px;
+  background: #f5c842; color: #1a1a2e;
+  border-radius: 10px; font-size: 10px; font-weight: 800;
+  padding: 2px 6px;
+}
+.col-card .cname { font-size: 12px; font-weight: bold; margin: 4px 0 2px; }
+.col-card .cstats-row { font-size: 11px; color: #aaa; margin-bottom: 6px; }
+.col-card .atk-bonus { color: #2ecc71; }
+.col-card .lvup-btn {
+  width: 100%; padding: 5px 0; font-size: 11px; font-weight: 700;
+  border: none; border-radius: 6px; cursor: pointer;
+  background: linear-gradient(135deg,#f5c842,#ff6b35);
+  color: #1a1a2e; transition: all .15s;
+}
+.col-card .lvup-btn:disabled {
+  background: #2a2a4a; color: #555; cursor: default;
+}
+.col-card .lvup-btn:not(:disabled):hover { transform: translateY(-1px); }
+.col-card.max-level { border-color: #f5c842; }
+#collection-close-btn {
+  padding: 10px 40px; background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.2); color: #eee;
+  border-radius: 24px; font-size: .95rem; cursor: pointer;
+  margin-top: 4px;
+}
+#collection-close-btn:hover { background: rgba(255,255,255,.15); }
+
+/* ── 보상 화면 ── */
+#reward-screen {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.96); z-index: 160;
+  flex-direction: column; align-items: center; justify-content: center;
+  gap: 20px;
+}
+#reward-screen h2 { color: #f5c842; font-size: 1.4rem; }
+#reward-cards-row {
+  display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+}
+.reward-card {
+  background: #16213e; border: 2px solid #2ecc71;
+  border-radius: 12px; padding: 16px 14px; text-align: center;
+  min-width: 90px;
+  animation: rewardPop .4s cubic-bezier(.34,1.56,.64,1) both;
+}
+.reward-card:nth-child(2) { animation-delay: .12s; }
+.reward-card:nth-child(3) { animation-delay: .24s; }
+@keyframes rewardPop {
+  from { transform: scale(0) rotate(-10deg); opacity: 0; }
+  to   { transform: scale(1) rotate(0deg);  opacity: 1; }
+}
+.reward-card .rcname { font-weight: 800; font-size: 13px; margin: 6px 0 3px; }
+.reward-card .rcstats { font-size: 11px; color: #888; }
+#reward-gold-line {
+  color: #f5c842; font-size: 1.1rem; font-weight: 700;
+}
+#reward-progress-line { color: #aaa; font-size: .9rem; }
+#reward-online-unlock {
+  display: none;
+  background: linear-gradient(135deg,#9b59b6,#3498db);
+  color: #fff; border-radius: 12px; padding: 14px 28px;
+  text-align: center; font-weight: 700; font-size: 1rem;
+  animation: rewardPop .5s .4s both;
+}
+#reward-close-btn {
+  padding: 12px 40px; background: linear-gradient(135deg,#f5c842,#ff6b35);
+  color: #1a1a2e; border: none; border-radius: 24px;
+  font-size: 1rem; font-weight: 700; cursor: pointer;
+  transition: all .15s;
+}
+#reward-close-btn:hover { transform: translateY(-2px); }
 </style>
 </head>
 <body>
@@ -363,7 +469,7 @@ canvas { display: block; }
 
 <div id="message"></div>
 <div id="instruction"></div>
-<button id="restart-btn" onclick="restartGame()">다시 시작</button>
+<button id="restart-btn" onclick="restartGame(); showTitleScreen()">다시 시작</button>
 
 <!-- 타이틀 화면 -->
 <div id="title-screen">
@@ -379,10 +485,13 @@ canvas { display: block; }
     <div class="preview-card">⚫</div>
   </div>
   <div id="title-btns">
-    <button class="title-btn primary" onclick="startGame()">게임 시작</button>
+    <button class="title-btn primary" onclick="startGame()">CPU 대전</button>
+    <button id="online-btn" class="title-btn secondary" onclick="onOnlineClick()" style="opacity:.4;cursor:default">🔒 온라인 대전</button>
+    <button class="title-btn secondary" onclick="openCollection()">내 컬렉션</button>
     <button class="title-btn secondary" onclick="startTutorial()">튜토리얼</button>
     <button class="title-btn secondary" onclick="showHowToPlay()">게임 방법</button>
   </div>
+  <div id="title-card-progress" style="color:#666;font-size:.8rem;margin-top:8px"></div>
   <div id="title-version">v0.1 · BETA</div>
 </div>
 
@@ -397,6 +506,28 @@ canvas { display: block; }
       <button id="tut-next-btn" onclick="tutNext()">다음 →</button>
     </div>
   </div>
+</div>
+
+<!-- 컬렉션 화면 -->
+<div id="collection-screen">
+  <h2>내 컬렉션</h2>
+  <div id="collection-gold-bar">🪙 <span id="col-gold">0</span> G</div>
+  <div id="collection-progress">
+    <span id="col-card-count">0 / 12</span>장 보유
+    <div id="progress-bar-wrap"><div id="progress-bar-fill"></div></div>
+  </div>
+  <div id="collection-grid"></div>
+  <button id="collection-close-btn" onclick="closeCollection()">닫기</button>
+</div>
+
+<!-- 보상 화면 -->
+<div id="reward-screen">
+  <h2>🎉 승리 보상!</h2>
+  <div id="reward-cards-row"></div>
+  <div id="reward-gold-line"></div>
+  <div id="reward-progress-line"></div>
+  <div id="reward-online-unlock">🌐 온라인 대전 잠금 해제!</div>
+  <button id="reward-close-btn" onclick="closeReward()">확인</button>
 </div>
 
 <!-- 게임 방법 화면 -->
@@ -551,6 +682,10 @@ function showCardDisplay(show) {
 // ─── 덱 선택 화면 ────────────────────────────────────
 let selectedCardIds = new Set();
 
+function getDeckMaxPick() {
+  return Math.min(6, getOwnedCards().length);
+}
+
 function openDeckSelect() {
   selectedCardIds.clear();
   phase = 'deck-select';
@@ -558,14 +693,16 @@ function openDeckSelect() {
 
   const grid = document.getElementById('card-grid');
   grid.innerHTML = '';
-  CARD_ROSTER.forEach(card => {
+  getOwnedCards().forEach(card => {
+    const eff = getEffectiveCard(card);
+    const lv = playerData.cardLevels[card.id] || 1;
     const el = document.createElement('div');
     el.className = 'card-item';
     el.dataset.id = card.id;
     el.innerHTML = `
-      <div><span class="type-badge ${typeClass(card.type)}">${typeLabel(card.type)}</span></div>
+      <div><span class="type-badge ${typeClass(card.type)}">${typeLabel(card.type)}</span>${lv > 1 ? `<span style="font-size:10px;color:#f5c842;margin-left:4px">Lv.${lv}</span>` : ''}</div>
       <div class="card-name">${card.label}</div>
-      <div class="card-stats">공격 <span>${card.atk}</span> &nbsp; 방어 <span>${card.def}</span></div>`;
+      <div class="card-stats">공격 <span>${eff.atk}</span> &nbsp; 방어 <span>${card.def}</span></div>`;
     el.addEventListener('click', () => toggleCard(card.id, el));
     grid.appendChild(el);
   });
@@ -573,11 +710,12 @@ function openDeckSelect() {
 }
 
 function toggleCard(id, el) {
+  const max = getDeckMaxPick();
   if (selectedCardIds.has(id)) {
     selectedCardIds.delete(id);
     el.classList.remove('selected');
   } else {
-    if (selectedCardIds.size >= 6) return;
+    if (selectedCardIds.size >= max) return;
     selectedCardIds.add(id);
     el.classList.add('selected');
   }
@@ -585,19 +723,32 @@ function toggleCard(id, el) {
 }
 
 function updateDeckHint() {
+  const max = getDeckMaxPick();
   const n = selectedCardIds.size;
-  document.getElementById('deck-select-hint').textContent = `카드를 6장 선택하세요 (${n} / 6)`;
+  document.getElementById('deck-select-hint').textContent = `카드를 ${max}장 선택하세요 (${n} / ${max})`;
   const btn = document.getElementById('deck-confirm-btn');
-  btn.classList.toggle('active', n === 6);
+  btn.classList.toggle('active', n === max);
 }
 
+let skipDraftMode = false;
+
 function confirmDeck() {
-  draft.playerPool = CARD_ROSTER.filter(c => selectedCardIds.has(c.id));
-  // 상대는 12장 전체에서 랜덤 6장
-  const shuffled = [...CARD_ROSTER].sort(() => Math.random() - .5);
-  draft.oppPool = shuffled.slice(0, 6);
+  const selected = CARD_ROSTER.filter(c => selectedCardIds.has(c.id));
   document.getElementById('deck-select-screen').style.display = 'none';
-  startRps();
+
+  if (selected.length < 6) {
+    // 카드 6장 미만: 드래프트 없이 선택한 카드 그대로 덱으로 사용
+    skipDraftMode = true;
+    playerDeck = selected.map(c => getEffectiveCard(c));
+    oppDeck = [...CARD_ROSTER].sort(() => Math.random() - .5).slice(0, 3);
+    match = createMatch(playerDeck, oppDeck);
+    startRps();
+  } else {
+    skipDraftMode = false;
+    draft.playerPool = selected;
+    draft.oppPool = [...CARD_ROSTER].sort(() => Math.random() - .5).slice(0, 6);
+    startRps();
+  }
 }
 
 // ─── 드래프트 상태 ───────────────────────────────────
@@ -723,18 +874,9 @@ function advanceDraft() {
 
 function finishDraft() {
   document.getElementById('draft-screen').style.display = 'none';
-  const isFirst = draft.firstPlayer === 'player';
-  if (isFirst) {
-    playerDeck = draft.playerPicked;
-    oppDeck    = draft.oppPicked;
-  } else {
-    // player가 후공이면 playerPicked/oppPicked 역할 그대로
-    playerDeck = draft.playerPicked;
-    oppDeck    = draft.oppPicked;
-  }
-  // match 재생성 (RPS 결과 유지 — 이미 firstAttacker 설정됨)
+  playerDeck = draft.playerPicked.map(c => getEffectiveCard(c));
+  oppDeck    = draft.oppPicked;
   match = createMatch(playerDeck, oppDeck);
-  // firstAttacker 복원
   match.state.firstAttacker = draft.firstPlayer;
   match.state.phase = 'card-select';
   openCardSelect();
@@ -881,20 +1023,14 @@ function handleRpsResult(result) {
     }, 1400);
   } else if (result.winner === 'player') {
     setMsg('이겼다! 내가 선공!');
-    if (tutMode) {
-      tutCheckpoint('rps');
-      setTimeout(openCardSelect, 1600);
-    } else {
-      setTimeout(startDraft, 1600);
-    }
+    if (tutMode) { tutCheckpoint('rps'); setTimeout(openCardSelect, 1600); }
+    else if (skipDraftMode) { setTimeout(openCardSelect, 1600); }
+    else { setTimeout(startDraft, 1600); }
   } else {
     setMsg('졌다... 상대가 선공!');
-    if (tutMode) {
-      tutCheckpoint('rps');
-      setTimeout(openCardSelect, 1600);
-    } else {
-      setTimeout(startDraft, 1600);
-    }
+    if (tutMode) { tutCheckpoint('rps'); setTimeout(openCardSelect, 1600); }
+    else if (skipDraftMode) { setTimeout(openCardSelect, 1600); }
+    else { setTimeout(startDraft, 1600); }
   }
 }
 
@@ -1113,7 +1249,16 @@ function endCurrentRound() {
       setMsg(win ? '🏆 매치 승리!' : '💀 매치 패배...');
       setHint('');
       showCardDisplay(false);
-      document.getElementById('restart-btn').style.display = 'inline-block';
+      if (win && !tutMode) {
+        // CPU 승리 보상: 카드 3장 + 골드
+        setTimeout(() => {
+          const newCards = grantRandomCards(3);
+          restartGame();
+          showRewardScreen(newCards, CPU_WIN_GOLD);
+        }, 1800);
+      } else {
+        document.getElementById('restart-btn').style.display = 'inline-block';
+      }
     }, 1500);
   } else {
     setTimeout(openCardSelect, 2000);
@@ -1420,11 +1565,157 @@ function restartGame() {
   document.getElementById('restart-btn').style.display='none';
   showCardDisplay(false);
   updatePips();
-  initAndStartRps();
 }
 
 function initAndStartRps() {
   openDeckSelect();
+}
+
+// ── 플레이어 데이터 (localStorage) ──────────────────
+const LEVEL_MAX  = 3;
+const LEVEL_COST = [0, 200, 500]; // Lv1→2: 200G, Lv2→3: 500G
+const CPU_WIN_GOLD = 150;
+
+const DEFAULT_DATA = () => ({
+  cards: ['none_cannon', 'none_balance', 'none_tank'],
+  gold: 0,
+  cardLevels: { none_cannon: 1, none_balance: 1, none_tank: 1 },
+  tutorialDone: false,
+});
+
+let playerData = null;
+
+function loadPlayerData() {
+  try {
+    const s = localStorage.getItem('ddakji_v1');
+    playerData = s ? JSON.parse(s) : DEFAULT_DATA();
+  } catch { playerData = DEFAULT_DATA(); }
+}
+
+function savePlayerData() {
+  localStorage.setItem('ddakji_v1', JSON.stringify(playerData));
+}
+
+function getOwnedCards() {
+  return CARD_ROSTER.filter(c => playerData.cards.includes(c.id));
+}
+
+function getEffectiveCard(card) {
+  const lv = playerData.cardLevels[card.id] || 1;
+  return { ...card, atk: card.atk + (lv - 1) };
+}
+
+function isOnlineUnlocked() {
+  return playerData.cards.length >= 12;
+}
+
+function grantRandomCards(count) {
+  const unowned = CARD_ROSTER.filter(c => !playerData.cards.includes(c.id));
+  const picks = [...unowned].sort(() => Math.random() - .5).slice(0, Math.min(count, unowned.length));
+  picks.forEach(c => {
+    playerData.cards.push(c.id);
+    playerData.cardLevels[c.id] = 1;
+  });
+  savePlayerData();
+  return picks;
+}
+
+function canLevelUp(cardId) {
+  const lv = playerData.cardLevels[cardId] || 1;
+  return lv < LEVEL_MAX && playerData.gold >= LEVEL_COST[lv];
+}
+
+function levelUpCard(cardId) {
+  if (!canLevelUp(cardId)) return false;
+  const lv = playerData.cardLevels[cardId] || 1;
+  playerData.gold -= LEVEL_COST[lv];
+  playerData.cardLevels[cardId] = lv + 1;
+  savePlayerData();
+  return true;
+}
+
+// ── 컬렉션 화면 ─────────────────────────────────────
+function openCollection() {
+  document.getElementById('title-screen').style.display = 'none';
+  renderCollection();
+  document.getElementById('collection-screen').style.display = 'flex';
+}
+
+function closeCollection() {
+  document.getElementById('collection-screen').style.display = 'none';
+  showTitleScreen();
+}
+
+function renderCollection() {
+  document.getElementById('col-gold').textContent = playerData.gold;
+  const n = playerData.cards.length;
+  document.getElementById('col-card-count').textContent = `${n} / 12`;
+  document.getElementById('progress-bar-fill').style.width = `${Math.min(100, n / 12 * 100)}%`;
+
+  const grid = document.getElementById('collection-grid');
+  grid.innerHTML = '';
+  getOwnedCards().forEach(card => {
+    const lv = playerData.cardLevels[card.id] || 1;
+    const eff = getEffectiveCard(card);
+    const maxed = lv >= LEVEL_MAX;
+    const canUp = canLevelUp(card.id);
+    const cost = LEVEL_COST[lv];
+
+    const div = document.createElement('div');
+    div.className = 'col-card' + (maxed ? ' max-level' : '');
+    div.innerHTML = `
+      ${lv > 1 ? `<div class="lv-badge">Lv.${lv}</div>` : ''}
+      <div><span class="badge ${typeClass(card.type)}">${typeLabel(card.type)}</span></div>
+      <div class="cname">${card.label}</div>
+      <div class="cstats-row">
+        공 <span class="${lv>1?'atk-bonus':''}">${eff.atk}</span> / 방 ${card.def}
+      </div>
+      <button class="lvup-btn" ${maxed||!canUp?'disabled':''} onclick="doLevelUp('${card.id}')">
+        ${maxed ? 'MAX' : `Lv.${lv+1} (${cost}G)`}
+      </button>`;
+    grid.appendChild(div);
+  });
+}
+
+function doLevelUp(cardId) {
+  if (levelUpCard(cardId)) renderCollection();
+}
+
+// ── 보상 화면 ───────────────────────────────────────
+function showRewardScreen(newCards, goldEarned) {
+  const wasLocked = !isOnlineUnlocked();
+  // 이미 grantRandomCards에서 cards에 추가됨
+  playerData.gold += goldEarned;
+  savePlayerData();
+  const nowUnlocked = isOnlineUnlocked();
+
+  const row = document.getElementById('reward-cards-row');
+  row.innerHTML = '';
+  newCards.forEach(card => {
+    const div = document.createElement('div');
+    div.className = 'reward-card';
+    div.innerHTML = `
+      <div><span class="badge ${typeClass(card.type)}">${typeLabel(card.type)}</span></div>
+      <div class="rcname">${card.label}</div>
+      <div class="rcstats">공${card.atk} / 방${card.def}</div>`;
+    row.appendChild(div);
+  });
+
+  document.getElementById('reward-gold-line').textContent = `🪙 +${goldEarned}G 획득! (보유: ${playerData.gold}G)`;
+  document.getElementById('reward-progress-line').textContent = `카드 ${playerData.cards.length} / 12`;
+  document.getElementById('reward-online-unlock').style.display = (wasLocked && nowUnlocked) ? 'block' : 'none';
+  document.getElementById('reward-screen').style.display = 'flex';
+}
+
+function closeReward() {
+  document.getElementById('reward-screen').style.display = 'none';
+  showTitleScreen();
+}
+
+function onOnlineClick() {
+  if (isOnlineUnlocked()) {
+    alert('온라인 대전은 준비 중입니다!');
+  }
 }
 
 // ── 튜토리얼 ────────────────────────────────────────
@@ -1535,24 +1826,28 @@ function endTutorial() {
 
 // ─── 타이틀 화면 ─────────────────────────────────────
 function showTitleScreen() {
-  // 배경 원 생성
   const bg = document.getElementById('title-bg-circles');
   if (!bg.children.length) {
     const colors = ['#f5c842','#e74c3c','#3498db','#2ecc71','#9b59b6'];
     for (let i = 0; i < 8; i++) {
       const s = document.createElement('span');
       const size = 120 + Math.random() * 300;
-      s.style.cssText = `
-        width:${size}px; height:${size}px;
-        background:${colors[i % colors.length]};
-        left:${Math.random()*100}%; top:${Math.random()*100}%;
-        transform: translate(-50%,-50%);
-        animation-delay:${Math.random()*4}s;
-        animation-duration:${6+Math.random()*4}s;
-      `;
+      s.style.cssText = `width:${size}px;height:${size}px;background:${colors[i%colors.length]};left:${Math.random()*100}%;top:${Math.random()*100}%;transform:translate(-50%,-50%);animation-delay:${Math.random()*4}s;animation-duration:${6+Math.random()*4}s;`;
       bg.appendChild(s);
     }
   }
+  // 온라인 버튼 상태
+  const ob = document.getElementById('online-btn');
+  if (isOnlineUnlocked()) {
+    ob.textContent = '🌐 온라인 대전';
+    ob.style.opacity = '1'; ob.style.cursor = 'pointer';
+  } else {
+    ob.textContent = `🔒 온라인 대전 (${playerData.cards.length}/12)`;
+    ob.style.opacity = '.4'; ob.style.cursor = 'default';
+  }
+  // 카드 진행도 표시
+  document.getElementById('title-card-progress').textContent =
+    `카드 ${playerData.cards.length} / 12 · 🪙 ${playerData.gold}G`;
   document.getElementById('title-screen').style.display = 'flex';
 }
 
@@ -1570,6 +1865,7 @@ function hideHowToPlay() {
 }
 
 // ─── 시작 ────────────────────────────────────────────
+loadPlayerData();
 updatePips();
 showTitleScreen();
 </script>
