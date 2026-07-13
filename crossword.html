@@ -134,8 +134,6 @@
 <h1>십자말풀이</h1>
 <div class="toolbar">
   <span id="dirLabel">입력 방향: 가로 →</span>
-  <button id="btnClear">전체 지우기</button>
-  <button id="btnPrint">인쇄</button>
   <button id="btnShare">링크 복사</button>
   <span style="color:#888; font-size:12px;">(칸을 한 번 더 클릭하면 가로/세로 전환)</span>
   <span id="syncStatus">오프라인 모드 (이 기기에만 저장)</span>
@@ -503,17 +501,6 @@
   acrossClues.addEventListener('input', clueInput);
   downClues.addEventListener('input', clueInput);
 
-  document.getElementById('btnClear').addEventListener('click', () => {
-    const msg = fbRoot
-      ? '모든 참가자의 화면에서 글자가 지워집니다. 전부 지울까요?'
-      : '입력한 글자를 모두 지울까요? (열쇠 메모는 유지됩니다)';
-    if (!confirm(msg)) return;
-    for (const k in inputs) inputs[k].value = '';
-    if (fbRoot) fbRoot.child('cells').set(null);
-    else saveLocal();
-    clearHl();
-  });
-  document.getElementById('btnPrint').addEventListener('click', () => window.print());
   document.getElementById('btnShare').addEventListener('click', async () => {
     const url = location.href;
     try {
