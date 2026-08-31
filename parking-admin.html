@@ -251,6 +251,12 @@
     });
   }
 
+  function todayStr(){
+    const d = new Date();
+    const days = ['일','월','화','수','목','금','토'];
+    return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
+  }
+
   function init(){
     firebase.initializeApp(FIREBASE_CONFIG);
     const db = firebase.database();
@@ -258,7 +264,7 @@
 
     db.ref('.info/connected').on('value', snap => {
       if(snap.val()){
-        connBar.textContent = '🟢 실시간 연결됨';
+        connBar.textContent = '🟢 실시간 연결됨 · ' + todayStr();
         connBar.className = 'on';
       } else {
         connBar.textContent = '🔴 연결 끊김 · 재접속 중…';
