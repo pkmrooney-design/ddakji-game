@@ -157,13 +157,13 @@
   const connBar = document.getElementById('connBar');
   const state = {}; // id -> { status, updatedAt }
 
-  function timeAgo(ts){
+  function formatUpdated(ts){
     if(!ts) return '아직 기록 없음';
-    const diff = Math.floor((Date.now() - ts) / 1000);
-    if(diff < 60) return '방금 전 업데이트';
-    if(diff < 3600) return Math.floor(diff/60) + '분 전 업데이트';
-    if(diff < 86400) return Math.floor(diff/3600) + '시간 전 업데이트';
-    return Math.floor(diff/86400) + '일 전 업데이트';
+    const d = new Date(ts);
+    const now = new Date();
+    const timeStr = d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: true });
+    if(d.toDateString() === now.toDateString()) return timeStr + ' 업데이트';
+    return (d.getMonth()+1) + '월 ' + d.getDate() + '일 ' + timeStr + ' 업데이트';
   }
 
   function render(){
@@ -174,19 +174,11 @@
         <div class="lot-card ${status}">
           <div class="lot-name">${lot.name}</div>
           <div class="lot-status ${status}">${status}</div>
-          <div class="lot-updated" data-updated="${lot.id}">${timeAgo(s.updatedAt)}</div>
+          <div class="lot-updated">${formatUpdated(s.updatedAt)}</div>
         </div>
       `;
     }).join('');
   }
-
-  function refreshTimes(){
-    LOTS.forEach(lot => {
-      const el = lotsEl.querySelector(`[data-updated="${lot.id}"]`);
-      if(el) el.textContent = timeAgo((state[lot.id]||{}).updatedAt);
-    });
-  }
-  setInterval(refreshTimes, 15000);
 
   function init(){
     firebase.initializeApp(FIREBASE_CONFIG);

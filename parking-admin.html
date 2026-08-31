@@ -201,33 +201,31 @@
     { key: '혼잡', cls: 'btn-busy' },
     { key: '만차', cls: 'btn-full' }
   ];
-  const CLS_BY_STATUS = Object.fromEntries(STATUSES.map(s => [s.key, s.cls]));
 
   const lotsEl = document.getElementById('lots');
   const connBar = document.getElementById('connBar');
   const state = {}; // id -> { status, updatedAt }
 
-  function timeAgo(ts){
+  function formatUpdated(ts){
     if(!ts) return '아직 기록 없음';
-    const diff = Math.floor((Date.now() - ts) / 1000);
-    if(diff < 60) return '방금 전';
-    if(diff < 3600) return Math.floor(diff/60) + '분 전';
-    if(diff < 86400) return Math.floor(diff/3600) + '시간 전';
-    return Math.floor(diff/86400) + '일 전';
+    const d = new Date(ts);
+    const now = new Date();
+    const timeStr = d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: true });
+    if(d.toDateString() === now.toDateString()) return '마지막 업데이트 ' + timeStr;
+    return '마지막 업데이트 ' + (d.getMonth()+1) + '월 ' + d.getDate() + '일 ' + timeStr;
   }
 
   function render(){
     lotsEl.innerHTML = LOTS.map(lot => {
       const s = state[lot.id] || {};
       const status = s.status || '미설정';
-      const badgeCls = CLS_BY_STATUS[s.status] || '';
       return `
         <div class="lot-card">
           <div class="lot-head">
             <span class="lot-name">${lot.name}</span>
             <span class="lot-status-badge ${status}">${status}</span>
           </div>
-          <div class="lot-updated" data-updated="${lot.id}">${timeAgo(s.updatedAt)}</div>
+          <div class="lot-updated">${formatUpdated(s.updatedAt)}</div>
           <div class="btn-grid">
             ${STATUSES.map(st => `
               <button class="status-btn ${st.cls} ${s.status === st.key ? 'active' : 'dim'}"
@@ -242,14 +240,6 @@
       btn.addEventListener('click', () => setStatus(btn.dataset.lot, btn.dataset.status));
     });
   }
-
-  function refreshTimes(){
-    LOTS.forEach(lot => {
-      const el = lotsEl.querySelector(`[data-updated="${lot.id}"]`);
-      if(el) el.textContent = timeAgo((state[lot.id]||{}).updatedAt);
-    });
-  }
-  setInterval(refreshTimes, 15000);
 
   let dbRef = null;
 
