@@ -20,12 +20,16 @@
     --full: #c0392b;
   }
   *{ box-sizing: border-box; }
+  html, body{ height: 100%; }
   body{
     margin: 0;
     min-height: 100vh;
+    min-height: 100dvh;
     background: var(--bg);
     color: var(--text);
     font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', -apple-system, sans-serif;
+    display: flex;
+    flex-direction: column;
   }
 
   .gov-header{
@@ -67,8 +71,14 @@
   #connBar.on{ color: var(--ok); }
   #connBar.off{ color: var(--full); }
 
-  main{ padding: 20px 16px 40px; }
+  main{
+    flex: 1;
+    display: flex;
+    padding: 16px;
+    min-height: 0;
+  }
   .lots{
+    width: 100%;
     max-width: 480px;
     margin: 0 auto;
     display: flex;
@@ -76,29 +86,36 @@
     gap: 14px;
   }
   .lot-card{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
     background: var(--card);
     border: 1px solid var(--line);
     border-left: 6px solid var(--text-dim);
-    border-radius: 6px;
-    padding: 20px 20px 18px;
+    border-radius: 10px;
+    padding: 20px;
     box-shadow: 0 1px 2px rgba(156,28,46,0.08);
   }
   .lot-name{
-    font-size: 14px;
+    font-size: clamp(14px, 3.5vw, 18px);
     color: var(--text-dim);
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     font-weight: 600;
   }
   .lot-status{
-    font-size: 30px;
+    font-size: clamp(38px, 13vw, 72px);
     font-weight: 800;
     letter-spacing: -0.02em;
+    line-height: 1.1;
   }
   .lot-status.여유{ color: var(--ok); }
   .lot-status.보통{ color: var(--mid); }
   .lot-status.혼잡{ color: var(--busy); }
   .lot-status.만차{ color: var(--full); }
-  .lot-status.미설정{ color: var(--text-dim); font-size: 20px; }
+  .lot-status.미설정{ color: var(--text-dim); font-size: clamp(24px, 8vw, 40px); }
 
   .lot-card.여유{ border-left-color: var(--ok); }
   .lot-card.보통{ border-left-color: var(--mid); }
@@ -106,9 +123,9 @@
   .lot-card.만차{ border-left-color: var(--full); }
 
   .lot-updated{
-    font-size: 12px;
+    font-size: clamp(12px, 3vw, 14px);
     color: var(--text-dim);
-    margin-top: 10px;
+    margin-top: 14px;
   }
 
 </style>
