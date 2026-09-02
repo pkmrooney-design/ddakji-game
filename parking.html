@@ -45,6 +45,13 @@
     gap: 10px;
   }
   .brand-icon{ flex: none; width: 40px; height: 40px; }
+  .org-name{
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #f2cdd2;
+    text-align: left;
+    margin-bottom: 2px;
+  }
   .gov-header h1{
     margin: 0;
     font-size: 20px;
@@ -125,6 +132,13 @@
     margin-top: 14px;
   }
 
+  .notice{
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-dim);
+    padding: 0 20px 16px;
+  }
+
 </style>
 </head>
 <body>
@@ -137,6 +151,7 @@
       <text x="60" y="72" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="58" fill="#ffffff" text-anchor="middle">P</text>
     </svg>
     <div>
+      <div class="org-name">국민건강보험공단 대구수성지사</div>
       <h1>실시간 주차장 현황</h1>
       <div class="sub">새로고침 없이 자동으로 갱신돼요</div>
     </div>
@@ -147,6 +162,7 @@
 <main>
   <div class="lots" id="lots"></div>
 </main>
+<div class="notice">※ 상태는 관리자가 직접 입력하며, 상황에 따라 업데이트가 다소 늦어질 수 있습니다.</div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
