@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>발표자료</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: #1c1c1e;
+    color: #f2f2f2;
+    font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+  }
+  header {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(28,28,30,0.92);
+    backdrop-filter: blur(6px);
+    padding: 10px 14px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid #3a3a3c;
+  }
+  header h1 {
+    font-size: 15px; margin: 0; font-weight: 600;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    max-width: 70%;
+  }
+  #counter {
+    font-size: 13px; color: #a1a1a6;
+    background: #2c2c2e; padding: 3px 10px; border-radius: 999px;
+    flex-shrink: 0;
+  }
+  main {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 12px 0 40px;
+  }
+  .slide-wrap {
+    width: 100%; max-width: 720px;
+    padding: 0 10px; margin-bottom: 14px;
+  }
+  .slide-wrap img {
+    width: 100%; display: block;
+    aspect-ratio: 16 / 9;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+    background: #2c2c2e;
+    object-fit: contain;
+  }
+  .slide-num {
+    text-align: center; font-size: 12px; color: #8e8e93;
+    margin-top: 6px;
+  }
+  #status {
+    text-align: center; padding: 60px 20px; color: #a1a1a6; font-size: 14px;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title">발표자료</h1>
+  <span id="counter">- / -</span>
+</header>
+<main id="main">
+  <div id="status">불러오는 중...</div>
+</main>
+
+<script>
+async function init() {
+  const params = new URLSearchParams(location.search);
+  const id = params.get('id');
+  const statusEl = document.getElementById('status');
+  const mainEl = document.getElementById('main');
+  const titleEl = document.getElementById('title');
+  const counterEl = document.getElementById('counter');
+
+  if (!id) {
+    statusEl.textContent = '자료 id가 지정되지 않았어요. (예: ?id=biz-strategy)';
+    return;
+  }
+
+  let manifest;
+  try {
+    const res = await fetch(`slides/${id}/manifest.json`, { cache: 'no-store' });
+    if (!res.ok) throw new Error('not found');
+    manifest = await res.json();
+  } catch (e) {
+    statusEl.textContent = '자료를 찾을 수 없어요. 링크를 다시 확인해주세요.';
+    return;
+  }
+
+  document.title = manifest.title || '발표자료';
+  titleEl.textContent = manifest.title || '발표자료';
+  counterEl.textContent = `1 / ${manifest.count}`;
+
+  statusEl.remove();
+
+  const pad = manifest.pad || 2;
+  const slides = [];
+  for (let i = 1; i <= manifest.count; i++) {
+    const num = String(i).padStart(pad, '0');
+    const wrap = document.createElement('div');
+    wrap.className = 'slide-wrap';
+    wrap.dataset.index = i;
+
+    const img = document.createElement('img');
+    img.src = `${manifest.folder}/${manifest.prefix}${num}.${manifest.ext}`;
+    img.alt = `슬라이드 ${i}`;
+    img.loading = i <= 2 ? 'eager' : 'lazy';
+
+    const label = document.createElement('div');
+    label.className = 'slide-num';
+    label.textContent = `${i} / ${manifest.count}`;
+
+    wrap.appendChild(img);
+    wrap.appendChild(label);
+    mainEl.appendChild(wrap);
+    slides.push(wrap);
+  }
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        counterEl.textContent = `${entry.target.dataset.index} / ${manifest.count}`;
+      }
+    });
+  }, { threshold: 0.6 });
+  slides.forEach(s => io.observe(s));
+}
+
+init();
+</script>
+</body>
+</html>
